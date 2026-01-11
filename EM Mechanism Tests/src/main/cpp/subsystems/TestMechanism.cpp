@@ -31,7 +31,7 @@ _commandPositionVoltage(units::angle::turn_t(0.0)) {
   if (!_hardwareConfigured) {
     std::cerr << "Test Mechanisms: Hardware Failed To Configure!" << std::endl;
   }
-
+  _command = 6_mps;
 }
 
 
@@ -58,7 +58,6 @@ void TestMechanism::Periodic() {
   // // Process command:
   if (std::holds_alternative<units::velocity::meters_per_second_t>(_command)) {
       // Send velocity based command:
-      _exampleMotor.Set(5);
       // Convert to hardware units:
       // Multiply by conversion to produce commands.
       auto angular_vel = std::get<units::velocity::meters_per_second_t>(_command) * TurnsPerMeter;
@@ -90,7 +89,7 @@ configs::TalonFXConfiguration configs{};
 
     // Slot 0 for the velocity control loop:
     configs.Slot0.kV = 0.12;
-    configs.Slot0.kP = 0.15;
+    configs.Slot0.kP = 0.2;
     configs.Slot0.kI = 0.0;
     configs.Slot0.kD = 0.01;
     configs.Slot0.kA = 0.0;
@@ -103,13 +102,13 @@ configs::TalonFXConfiguration configs{};
     configs.Slot1.kA = 0.0;
 
     // Set whether motor control direction is inverted or not:
-    configs.MotorOutput.WithInverted(ctre::phoenix6::signals::InvertedValue::CounterClockwise_Positive);
+    configs.MotorOutput.WithInverted(ctre::phoenix6::signals::InvertedValue::Clockwise_Positive);
 
     // Set the control configuration for the drive motor:
     auto status = _exampleMotor.GetConfigurator().Apply(configs, 1_s ); // 1 Second configuration timeout.
 
     if (!status.IsOK()) {
-        // Log errors.
+        std::cerr << "Test Mech not working" << std::endl;
     }
 
     // Set our neutral mode to brake on:

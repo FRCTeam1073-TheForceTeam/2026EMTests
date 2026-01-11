@@ -33,7 +33,7 @@ class TestMechanism : public frc2::SubsystemBase {
   static constexpr int ExampleMotorId = 10;
 
   // Mechanism conversion constants for the subsystem:
-  static constexpr auto TurnsPerMeter = units::angle::turn_t(32.0) / units::length::meter_t(1.0);
+  static constexpr auto TurnsPerMeter = units::angle::turn_t(3.1) / units::length::meter_t(1.0);
   static constexpr auto AmpsPerNewton = units::current::ampere_t(10.0) / units::force::newton_t(1.0);
 
   

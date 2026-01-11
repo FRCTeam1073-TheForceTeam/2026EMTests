@@ -11,7 +11,7 @@
 
 RobotContainer::RobotContainer() {
   // Initialize all of your commands and subsystems here
-
+  m_testMechanism = std::make_shared<TestMechanism>(),
   // Configure the button bindings
   ConfigureBindings();
 }

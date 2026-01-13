@@ -19,7 +19,8 @@ _examplePositionSig(_exampleMotor.GetPosition()),
 _exampleVelocitySig(_exampleMotor.GetVelocity()),
 _exampleCurrentSig(_exampleMotor.GetTorqueCurrent()),
 _commandVelocityVoltage(units::angular_velocity::turns_per_second_t(0.0)),
-_commandPositionVoltage(units::angle::turn_t(0.0)) {
+_commandPositionVoltage(units::angle::turn_t(0.0)),
+_rateLimiter(150.0_tr_per_s_sq) {
   // Extra implementation of subsystem constructor goes here.
 
   // Assign gain slots for the commands to use:
@@ -31,7 +32,8 @@ _commandPositionVoltage(units::angle::turn_t(0.0)) {
   if (!_hardwareConfigured) {
     std::cerr << "Test Mechanisms: Hardware Failed To Configure!" << std::endl;
   }
-  _command = 6_mps;
+  // No command:
+  _command = std::monostate();
 }
 
 
@@ -61,8 +63,10 @@ void TestMechanism::Periodic() {
       // Convert to hardware units:
       // Multiply by conversion to produce commands.
       auto angular_vel = std::get<units::velocity::meters_per_second_t>(_command) * TurnsPerMeter;
+
+      auto limited_vel = _rateLimiter.Calculate(angular_vel);
       // Send to hardware:
-      _exampleMotor.SetControl(_commandVelocityVoltage.WithVelocity(angular_vel));
+      _exampleMotor.SetControl(_commandVelocityVoltage.WithVelocity(limited_vel));
   } else if (std::holds_alternative<units::length::meter_t>(_command)) {
       // Send position based command:
 

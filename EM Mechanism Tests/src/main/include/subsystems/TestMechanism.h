@@ -9,9 +9,11 @@
 
 #include <units/length.h>
 #include <units/velocity.h>
+#include <units/acceleration.h>
 #include <units/force.h>
 
 #include <ctre/phoenix6/TalonFX.hpp>
+#include <frc/filter/SlewRateLimiter.h>
 
 #include <variant>
 
@@ -81,9 +83,10 @@ class TestMechanism : public frc2::SubsystemBase {
   // Example TalonFX motor interface.
   ctre::phoenix6::hardware::TalonFX _exampleMotor;
 
+
   // CTRE hardware feedback signals:
-  ctre::phoenix6::StatusSignal<units::angular_velocity::turns_per_second_t> _exampleVelocitySig;
   ctre::phoenix6::StatusSignal<units::angle::turn_t> _examplePositionSig;
+  ctre::phoenix6::StatusSignal<units::angular_velocity::turns_per_second_t> _exampleVelocitySig;
   ctre::phoenix6::StatusSignal<units::current::ampere_t> _exampleCurrentSig;
 
 
@@ -93,6 +96,9 @@ class TestMechanism : public frc2::SubsystemBase {
   
   // Cached feedback:
   Feedback _feedback;
+
+  // Velocity slew rate limiter:
+  frc::SlewRateLimiter<units::angular_velocity::turns_per_second> _rateLimiter;
 
   // Cached command: Variant of possible different kinds of commands.
   Command  _command;

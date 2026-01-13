@@ -8,8 +8,8 @@
 #include <frc2/command/button/CommandXboxController.h>
 
 #include "Constants.h"
-#include "subsystems/ExampleSubsystem.h"
 #include "subsystems/TestMechanism.h"
+#include "commands/TestCommand.h"
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
@@ -22,7 +22,6 @@ class RobotContainer {
  public:
   RobotContainer();
 
-  frc2::CommandPtr GetAutonomousCommand();
 
  private:
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -30,7 +29,6 @@ class RobotContainer {
       OperatorConstants::kDriverControllerPort};
 
   // The robot's subsystems are defined here...
-  ExampleSubsystem m_subsystem;
   std::shared_ptr<TestMechanism> m_testMechanism;
 
   void ConfigureBindings();

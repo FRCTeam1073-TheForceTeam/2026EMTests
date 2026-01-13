@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #pragma once
+#include <memory>
 
 #include <frc2/command/Command.h>
 #include <frc2/command/CommandHelper.h>
@@ -10,11 +11,8 @@
 #include "subsystems/ExampleSubsystem.h"
 
 /**
- * An example command that uses an example subsystem.
- *
- * <p>Note that this extends CommandHelper, rather extending Command
- * directly; this is crucially important, or else the decorator functions in
- * Command will *not* work!
+ * This example command uses dashboard widgets to command the example
+ * subsystem in various ways.
  */
 class ExampleCommand
     : public frc2::CommandHelper<frc2::Command, ExampleCommand> {
@@ -24,8 +22,8 @@ class ExampleCommand
    *
    * @param subsystem The subsystem used by this command.
    */
-  explicit ExampleCommand(ExampleSubsystem* subsystem);
+  explicit ExampleCommand(std::shared_ptr<ExampleSubsystem> subsys);
 
  private:
-  ExampleSubsystem* m_subsystem;
+  std::shared_ptr<ExampleSubsystem> m_subsystem;
 };

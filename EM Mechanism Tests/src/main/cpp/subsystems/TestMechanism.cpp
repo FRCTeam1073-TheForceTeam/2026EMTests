@@ -7,6 +7,9 @@
 #include "subsystems/TestMechanism.h"
 #include <ctre/phoenix6/controls/NeutralOut.hpp>
 
+#include <frc/smartdashboard/SmartDashboard.h>
+
+
 using namespace ctre::phoenix6;
 
 /**
@@ -79,6 +82,10 @@ void TestMechanism::Periodic() {
       // No command, so send a "null" neutral output command if there is no position or velocity provided as a command:
     _exampleMotor.SetControl(controls::NeutralOut());
   }
+
+  frc::SmartDashboard::PutNumber("Test Mechanism RPM", _exampleVelocitySig.GetValue().value()/60.0);
+  frc::SmartDashboard::PutNumber("Test Mechanism m/s", _feedback.velocity.value());
+  frc::SmartDashboard::PutNumber("Test Mechanism Load A", _feedback.force.value());
 }
 
 // Helper function for configuring hardware from within the constructor of the subsystem.

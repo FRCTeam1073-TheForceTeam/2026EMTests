@@ -96,7 +96,7 @@ void TestMechanism::Periodic() {
   frc::SmartDashboard::PutNumber("Test Mechanism RPM", _exampleVelocitySig.GetValue().value()*60.0);
   frc::SmartDashboard::PutNumber("Test Mechanism m/s", _feedback.velocity.value());
   frc::SmartDashboard::PutNumber("Test Mechanism Load A", _feedback.force.value());
-  frc::SmartDashboard::PutNumber("Test Mechanism RPM Test",   (_feedback.velocity.value() * 60) * 100 / (2.54 * 4));
+  frc::SmartDashboard::PutNumber("Test Mechanism RPM Test",   (_feedback.velocity.value() * 60) * 100 / (2.54 * 2 * std::numbers::pi * 4));
 
   //4 IN DIAMETER
 }

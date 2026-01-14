@@ -24,6 +24,8 @@ class TestCommand
    */
   explicit TestCommand(std::shared_ptr<TestMechanism> subsys);
 
+  void Initialize() override;
+
    /**
    * Will be called periodically whenever the CommandScheduler runs.
    */

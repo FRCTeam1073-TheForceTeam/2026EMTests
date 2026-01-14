@@ -6,6 +6,7 @@
 
 #include "subsystems/TestMechanism.h"
 #include <ctre/phoenix6/controls/NeutralOut.hpp>
+#include <ctre/phoenix6/signals/SpnEnums.hpp>
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
@@ -47,6 +48,15 @@ void TestMechanism::SetCommand(Command cmd) {
   _command = cmd;
 }
 
+void TestMechanism::SetCoastMode(bool set) {
+  if(set) {
+    _exampleMotor.SetNeutralMode(0);
+  }
+  else {
+      _exampleMotor.SetNeutralMode(1);  
+  }
+}
+
 void TestMechanism::Periodic() {
   // Sample the hardware:
   BaseStatusSignal::RefreshAll(_examplePositionSig, _exampleVelocitySig, _exampleCurrentSig);
@@ -83,9 +93,12 @@ void TestMechanism::Periodic() {
     _exampleMotor.SetControl(controls::NeutralOut());
   }
 
-  frc::SmartDashboard::PutNumber("Test Mechanism RPM", _exampleVelocitySig.GetValue().value()/60.0);
+  frc::SmartDashboard::PutNumber("Test Mechanism RPM", _exampleVelocitySig.GetValue().value()*60.0);
   frc::SmartDashboard::PutNumber("Test Mechanism m/s", _feedback.velocity.value());
   frc::SmartDashboard::PutNumber("Test Mechanism Load A", _feedback.force.value());
+  frc::SmartDashboard::PutNumber("Test Mechanism RPM Test",   (_feedback.velocity.value() * 60) * 100 / (2.54 * 4));
+
+  //4 IN DIAMETER
 }
 
 // Helper function for configuring hardware from within the constructor of the subsystem.

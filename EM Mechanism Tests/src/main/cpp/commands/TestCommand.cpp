@@ -14,6 +14,9 @@ TestCommand::TestCommand(std::shared_ptr<TestMechanism> subsys)
     frc::SmartDashboard::PutNumber("TestCommand", 0.0);
   }
 
+  void TestCommand::Initialize() {
+    m_subsystem->SetCoastMode(true);
+  }
 
   void TestCommand::Execute()  {
 

@@ -71,6 +71,8 @@ class TestMechanism : public frc2::SubsystemBase {
   /// Set the command for the system.
   void SetCommand(Command cmd);
 
+  void SetCoastMode(bool set);
+
  private:
 
 

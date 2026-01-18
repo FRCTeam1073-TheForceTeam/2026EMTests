@@ -18,10 +18,12 @@ using namespace ctre::phoenix6;
  */
 TestMechanism::TestMechanism() :
 _hardwareConfigured(true),
-_exampleMotor(ExampleMotorId, CANBus("rio")),
-_examplePositionSig(_exampleMotor.GetPosition()),
-_exampleVelocitySig(_exampleMotor.GetVelocity()),
-_exampleCurrentSig(_exampleMotor.GetTorqueCurrent()),
+_leadMotor(LeadMotorId, CANBus("rio")),
+_followMotor(FollowMotorId, CANBus("rio")),
+
+_examplePositionSig(_leadMotor.GetPosition()),
+_exampleVelocitySig(_leadMotor.GetVelocity()),
+_exampleCurrentSig(_leadMotor.GetTorqueCurrent()),
 _commandVelocityVoltage(units::angular_velocity::turns_per_second_t(0.0)),
 _commandPositionVoltage(units::angle::turn_t(0.0)),
 _rateLimiter(150.0_tr_per_s_sq) {
@@ -50,10 +52,10 @@ void TestMechanism::SetCommand(Command cmd) {
 
 void TestMechanism::SetCoastMode(bool set) {
   if(set) {
-    _exampleMotor.SetNeutralMode(0);
+    _leadMotor.SetNeutralMode(0);
   }
   else {
-      _exampleMotor.SetNeutralMode(1);  
+      _leadMotor.SetNeutralMode(1);  
   }
 }
 
@@ -79,7 +81,7 @@ void TestMechanism::Periodic() {
 
       auto limited_vel = _rateLimiter.Calculate(angular_vel);
       // Send to hardware:
-      _exampleMotor.SetControl(_commandVelocityVoltage.WithVelocity(limited_vel));
+      _leadMotor.SetControl(_commandVelocityVoltage.WithVelocity(limited_vel));
   } else if (std::holds_alternative<units::length::meter_t>(_command)) {
       // Send position based command:
 
@@ -87,35 +89,34 @@ void TestMechanism::Periodic() {
       auto angle = std::get<units::length::meter_t>(_command) * TurnsPerMeter;
 
       // Send to hardware:
-      _exampleMotor.SetControl(_commandPositionVoltage.WithPosition(angle));
+      _leadMotor.SetControl(_commandPositionVoltage.WithPosition(angle));
   } else {
       // No command, so send a "null" neutral output command if there is no position or velocity provided as a command:
-    _exampleMotor.SetControl(controls::NeutralOut());
+    _leadMotor.SetControl(controls::NeutralOut());
   }
+
+  _followMotor.SetControl(controls::StrictFollower{_leadMotor.GetDeviceID()});
 
   frc::SmartDashboard::PutNumber("Test Mechanism RPM", _exampleVelocitySig.GetValue().value()*60.0);
   frc::SmartDashboard::PutNumber("Test Mechanism m/s", _feedback.velocity.value());
   frc::SmartDashboard::PutNumber("Test Mechanism Load A", _feedback.force.value());
-  frc::SmartDashboard::PutNumber("Test Mechanism RPM Test",   (_feedback.velocity.value() * 60) * 100 / (2.54 * 2 * std::numbers::pi * 4));
-
-  //4 IN DIAMETER
 }
 
 // Helper function for configuring hardware from within the constructor of the subsystem.
 bool TestMechanism::ConfigureHardware() {
 configs::TalonFXConfiguration configs{};
 
-    configs.TorqueCurrent.PeakForwardTorqueCurrent = 10.0_A; // Set current limits to keep from breaking things.
-    configs.TorqueCurrent.PeakReverseTorqueCurrent = -10.0_A; 
+    configs.TorqueCurrent.PeakForwardTorqueCurrent = 35.0_A; // Set current limits to keep from breaking things.
+    configs.TorqueCurrent.PeakReverseTorqueCurrent = -35.0_A; 
 
-    configs.Voltage.PeakForwardVoltage = 8_V; // These are pretty typical values, adjust as needed.
-    configs.Voltage.PeakReverseVoltage = -8_V;
+    configs.Voltage.PeakForwardVoltage = 10_V; // These are pretty typical values, adjust as needed.
+    configs.Voltage.PeakReverseVoltage = -10_V;
 
     // Slot 0 for the velocity control loop:
     configs.Slot0.kV = 0.12;
-    configs.Slot0.kP = 0.2;
+    configs.Slot0.kP = 0.35;
     configs.Slot0.kI = 0.0;
-    configs.Slot0.kD = 0.01;
+    configs.Slot0.kD = 0.03;
     configs.Slot0.kA = 0.0;
 
     // Slot 1 for position control mode:
@@ -129,23 +130,26 @@ configs::TalonFXConfiguration configs{};
     configs.MotorOutput.WithInverted(ctre::phoenix6::signals::InvertedValue::Clockwise_Positive);
 
     // Set the control configuration for the drive motor:
-    auto status = _exampleMotor.GetConfigurator().Apply(configs, 1_s ); // 1 Second configuration timeout.
+    auto status = _leadMotor.GetConfigurator().Apply(configs, 1_s ); // 1 Second configuration timeout.
 
     if (!status.IsOK()) {
         std::cerr << "Test Mech not working" << std::endl;
     }
 
     // Set our neutral mode to brake on:
-    status = _exampleMotor.SetNeutralMode(signals::NeutralModeValue::Brake, 1_s);
+    status = _leadMotor.SetNeutralMode(signals::NeutralModeValue::Brake, 1_s);
 
     if (!status.IsOK()) {
         // Log errors.
     }
 
+    // Set follower congig
+    configs::TalonFXConfiguration followerConfigs{};
+    followerConfigs.MotorOutput.WithInverted(ctre::phoenix6::signals::InvertedValue::CounterClockwise_Positive);
 
     // Depends on mechanism/subsystem design:
     // Optionally start out at zero after initialization:
-    _exampleMotor.SetPosition(units::angle::turn_t(0));
+    _leadMotor.SetPosition(units::angle::turn_t(0));
 
     // Log errors.
     return false;

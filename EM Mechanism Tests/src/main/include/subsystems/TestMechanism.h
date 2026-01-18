@@ -32,7 +32,8 @@ class TestMechanism : public frc2::SubsystemBase {
  public:
 
   // CANBusID for the motor.
-  static constexpr int ExampleMotorId = 10;
+  static constexpr int LeadMotorId = 10;
+  static constexpr int FollowMotorId = 8;
 
   // Mechanism conversion constants for the subsystem:
   static constexpr auto TurnsPerMeter = units::angle::turn_t(3.1) / units::length::meter_t(1.0);
@@ -83,8 +84,8 @@ class TestMechanism : public frc2::SubsystemBase {
   bool _hardwareConfigured;
 
   // Example TalonFX motor interface.
-  ctre::phoenix6::hardware::TalonFX _exampleMotor;
-
+  ctre::phoenix6::hardware::TalonFX _leadMotor;
+  ctre::phoenix6::hardware::TalonFX _followMotor;
 
   // CTRE hardware feedback signals:
   ctre::phoenix6::StatusSignal<units::angle::turn_t> _examplePositionSig;
